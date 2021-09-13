@@ -10,12 +10,10 @@
   "files": [
     "src",
     "lib",
-    "android",
     "ios",
     "cpp",
     "react-native-share-play.podspec",
     "!lib/typescript/example",
-    "!android/build",
     "!ios/build",
     "!**/__tests__",
     "!**/__fixtures__",
@@ -33,8 +31,7 @@
   },
   "keywords": [
     "react-native",
-    "ios",
-    "android"
+    "ios"
   ],
   "repository": "https://github.com/zhigang1992/react-native-share-play",
   "author": "Kyle Fang <zhigang1992@gmail.com> (https://github.com/zhigang1992)",
