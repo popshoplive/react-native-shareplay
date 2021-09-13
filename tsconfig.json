@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-share-play": ["./src/index"]
+      "react-native-ios-shareplay": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
