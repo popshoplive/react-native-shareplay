@@ -13,9 +13,29 @@ yarn add react-native-share-play
 ```js
 import SharePlay from "react-native-share-play";
 
-// ...
+// initialize
 
-const result = await SharePlay.multiply(3, 7);
+if (await SharePlay.isSharePlayAvailable()) {
+  if (await SharePlay.getInitialSession() != null) {
+    SharePlay.joinSession();
+  }
+}
+
+// event
+const newSessionEm = SharePlayEvent.addListener('newSession', (info) => {
+  // get ready
+  SharePlay.joinSession();
+});
+
+const newMessage = SharePlayEvent.addListener('receivedMessage', (info) => {
+  // process message
+});
+
+// post message
+await SharePlay.sendMessage(`Test Message: ${Math.random()}`).catch((e) =>
+  Alert.alert(e.message)
+);
+
 ```
 
 ## Contributing

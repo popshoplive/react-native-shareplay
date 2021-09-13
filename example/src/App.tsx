@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { StyleSheet, View, Text, Alert, Button } from 'react-native';
 import SharePlay, { SharePlayEvent } from 'react-native-share-play';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export default function App() {
   const [isAvailable, setIsAvailable] = useState(false);
@@ -32,6 +32,11 @@ export default function App() {
       newMessage.remove();
     };
   }, []);
+  const onPost = useCallback(async () => {
+    await SharePlay.sendMessage(`Test Message: ${Math.random()}`).catch((e) =>
+      Alert.alert(e.message)
+    );
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -47,14 +52,7 @@ export default function App() {
           }
         }}
       />
-      <Button
-        title={'Post Message'}
-        onPress={async () => {
-          await SharePlay.sendMessage(`Test Message: ${Math.random()}`).catch(
-            (e) => Alert.alert(e.message)
-          );
-        }}
-      />
+      <Button title={'Post Message'} onPress={onPost} />
     </View>
   );
 }
