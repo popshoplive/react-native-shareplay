@@ -1,18 +1,60 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
-import SharePlay from 'react-native-share-play';
+import { StyleSheet, View, Text, Alert, Button } from 'react-native';
+import SharePlay, { SharePlayEvent } from 'react-native-share-play';
+import { useState } from 'react';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [logs, setLogs] = useState<string[]>([]);
   React.useEffect(() => {
-    SharePlay.multiply(3, 7).then(setResult);
+    SharePlay.isSharePlayAvailable().then((ava) => {
+      setIsAvailable(ava);
+      if (ava) {
+        SharePlay.getInitialSession().then((session) => {
+          if (session != null) {
+            SharePlay.joinSession();
+          }
+        });
+      }
+    });
+    const em = SharePlayEvent.addListener('available', setIsAvailable);
+    const newSessionEm = SharePlayEvent.addListener('newSession', (id) => {
+      setLogs((p) => [...p, `new session: ${JSON.stringify(id)}`]);
+      SharePlay.joinSession();
+    });
+    const newMessage = SharePlayEvent.addListener('receivedMessage', (info) => {
+      setLogs((p) => [...p, `new message: ${info}`]);
+    });
+    return () => {
+      em.remove();
+      newSessionEm.remove();
+      newMessage.remove();
+    };
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>{isAvailable ? 'True' : 'False'}</Text>
+      <Text>{JSON.stringify(logs, null, 2)}</Text>
+      <Button
+        title="Start"
+        onPress={async () => {
+          try {
+            await SharePlay.startActivity('Hello', 'World');
+          } catch (e) {
+            Alert.alert((e as Error).message);
+          }
+        }}
+      />
+      <Button
+        title={'Post Message'}
+        onPress={async () => {
+          await SharePlay.sendMessage(`Test Message: ${Math.random()}`).catch(
+            (e) => Alert.alert(e.message)
+          );
+        }}
+      />
     </View>
   );
 }

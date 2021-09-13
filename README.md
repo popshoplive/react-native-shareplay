@@ -5,7 +5,7 @@ iOS 15 share play API in RN
 ## Installation
 
 ```sh
-npm install react-native-share-play
+yarn add react-native-share-play
 ```
 
 ## Usage
