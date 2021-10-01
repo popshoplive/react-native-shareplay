@@ -4,21 +4,32 @@ import { StyleSheet, View, Text, Alert, Button } from 'react-native';
 import SharePlay, { SharePlayEvent } from 'react-native-ios-shareplay';
 import { useCallback, useState } from 'react';
 
-export default function App() {
+const useIsSharePlayAvailable = () => {
   const [isAvailable, setIsAvailable] = useState(false);
-  const [logs, setLogs] = useState<string[]>([]);
   React.useEffect(() => {
     SharePlay.isSharePlayAvailable().then((ava) => {
       setIsAvailable(ava);
-      if (ava) {
-        SharePlay.getInitialSession().then((session) => {
-          if (session != null) {
-            SharePlay.joinSession();
-          }
-        });
-      }
     });
     const em = SharePlayEvent.addListener('available', setIsAvailable);
+    return () => {
+      em.remove();
+    };
+  }, []);
+  return isAvailable;
+};
+
+export default function App() {
+  const isAvailable = useIsSharePlayAvailable();
+  const [logs, setLogs] = useState<string[]>([]);
+  React.useEffect(() => {
+    if (!isAvailable) {
+      return;
+    }
+    SharePlay.getInitialSession().then((session) => {
+      if (session != null) {
+        SharePlay.joinSession();
+      }
+    });
     const newSessionEm = SharePlayEvent.addListener('newSession', (id) => {
       setLogs((p) => [...p, `new session: ${JSON.stringify(id)}`]);
       SharePlay.joinSession();
@@ -27,11 +38,10 @@ export default function App() {
       setLogs((p) => [...p, `new message: ${info}`]);
     });
     return () => {
-      em.remove();
       newSessionEm.remove();
       newMessage.remove();
     };
-  }, []);
+  }, [isAvailable]);
   const onPost = useCallback(async () => {
     await SharePlay.sendMessage(`Test Message: ${Math.random()}`).catch((e) =>
       Alert.alert(e.message)
@@ -43,13 +53,21 @@ export default function App() {
       <Text>{isAvailable ? 'True' : 'False'}</Text>
       <Text>{JSON.stringify(logs, null, 2)}</Text>
       <Button
-        title="Start"
+        title="Start Directly"
         onPress={async () => {
-          try {
-            await SharePlay.startActivity('Hello', 'World');
-          } catch (e) {
-            Alert.alert((e as Error).message);
-          }
+          await SharePlay.startActivity(
+            `Started Directly ${Math.random()}`,
+            'Extra Info'
+          );
+        }}
+      />
+      <Button
+        title="Ask and start"
+        onPress={async () => {
+          await SharePlay.startActivity(
+            `Asked and Start ${Math.random()}`,
+            'Extra Info'
+          );
         }}
       />
       <Button title={'Post Message'} onPress={onPost} />

@@ -100,6 +100,14 @@ class ActualSharePlay {
         _ = try await activity.activate()
     }
     
+    func prepare(title: String, extraInfo: String?) async throws {
+        let activity = GenericGroupActivity(title: title, extraInfo: extraInfo)
+        let result = await activity.prepareForActivation()
+        if case .activationPreferred = result {
+            _ = try await activity.activate()
+        }
+    }
+    
     func join() {
         if let groupSession = groupSession {
             groupSession.join()
@@ -179,6 +187,24 @@ class SharePlay: RCTEventEmitter {
             reject("not_available", "Share Play is not available on this iOS version", nil)
         }
     }
+    
+    @objc(prepareAndStartActivity:withExtraInfo:withResolver:withRejecter:)
+    func prepareAndStartActivity(title: String, extraInfo: String?, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+        if #available(iOS 15, *) {
+            Task {
+                do {
+                    try await self.sharePlay?.start(title: title, extraInfo: extraInfo)
+                    resolve(nil)
+                } catch {
+                    reject("failed", "Failed to start group activity", error)
+                }
+
+            }
+        } else {
+            reject("not_available", "Share Play is not available on this iOS version", nil)
+        }
+    }
+
     
     @objc(getInitialSession:withRejecter:)
     func getInitialSession(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {

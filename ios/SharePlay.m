@@ -13,6 +13,11 @@ RCT_EXTERN_METHOD(startActivity:(NSString *)title
                 withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(prepareAndStartActivity:(NSString *)title
+                    withExtraInfo:(NSString *)extraInfo
+                withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(joinSession)
          
 RCT_EXTERN_METHOD(leaveSession)
