@@ -64,7 +64,7 @@ export default function App() {
       <Button
         title="Ask and start"
         onPress={async () => {
-          await SharePlay.startActivity(
+          await SharePlay.prepareAndStartActivity(
             `Asked and Start ${Math.random()}`,
             'Extra Info'
           );
