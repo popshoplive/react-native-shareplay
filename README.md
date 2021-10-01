@@ -8,6 +8,8 @@ iOS 15 share play API in RN
 yarn add react-native-ios-shareplay
 ```
 
+And go to Xcode Capabilities and enable "Group Activities"
+
 ## Usage
 
 ```js
