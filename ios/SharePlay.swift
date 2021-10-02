@@ -165,7 +165,7 @@ class SharePlay: RCTEventEmitter {
     @objc(isSharePlayAvailable:withRejecter:)
     func isSharePlayAvailable(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
         if #available(iOS 15, *) {
-            resolve(GroupStateObserver().isEligibleForGroupSession)
+            resolve(self.sharePlay?.groupSession != nil || GroupStateObserver().isEligibleForGroupSession)
         } else {
             resolve(false)
         }
