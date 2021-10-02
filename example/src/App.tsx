@@ -34,10 +34,14 @@ export default function App() {
       setLogs((p) => [...p, `new session: ${JSON.stringify(id)}`]);
       SharePlay.joinSession();
     });
+    const newActivity = SharePlayEvent.addListener('newActivity', (info) => {
+      setLogs((p) => [...p, `new activity: ${JSON.stringify(info)}`]);
+    });
     const newMessage = SharePlayEvent.addListener('receivedMessage', (info) => {
       setLogs((p) => [...p, `new message: ${info}`]);
     });
     return () => {
+      newActivity.remove();
       newSessionEm.remove();
       newMessage.remove();
     };
@@ -55,21 +59,21 @@ export default function App() {
       <Button
         title="Start Directly"
         onPress={async () => {
-          await SharePlay.startActivity(
-            `Started Directly ${Math.random()}`,
-            'Extra Info'
-          );
+          await SharePlay.startActivity(`Started Directly ${Math.random()}`, {
+            extraInfo: 'Extra Info',
+          });
         }}
       />
       <Button
         title="Ask and start"
         onPress={async () => {
-          await SharePlay.prepareAndStartActivity(
-            `Asked and Start ${Math.random()}`,
-            'Extra Info'
-          );
+          await SharePlay.startActivity(`Prepare first ${Math.random()}`, {
+            extraInfo: 'Extra Info',
+            prepareFirst: true,
+          });
         }}
       />
+      <Button title="Clear" onPress={() => setLogs([])} />
       <Button title={'Post Message'} onPress={onPost} />
     </View>
   );

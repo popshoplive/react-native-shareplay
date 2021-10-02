@@ -4,12 +4,14 @@ import Combine
 enum SharePlayEvent: String, CaseIterable {
     case available
     case newSession
+    case newActivity
     case receivedMessage
 }
 
 struct GenericGroupActivity: GroupActivity {
     let title: String
     let extraInfo: String?
+    let fallbackURL: String?
     
     static var activityIdentifier: String = "generic-group-activity"
     
@@ -18,8 +20,17 @@ struct GenericGroupActivity: GroupActivity {
         var metadata = GroupActivityMetadata()
         metadata.title = self.title
         metadata.type = .generic
+        metadata.fallbackURL = self.fallbackURL.flatMap({URL(string: $0)})
         return metadata
     }
+    
+    var eventPayload: [String: Any?] {
+        return [
+            "title": self.title,
+            "extraInfo": self.extraInfo
+        ]
+    }
+
 }
 
 struct GenericActivityMessage: Codable {
@@ -81,31 +92,41 @@ class ActualSharePlay {
             }
         }.store(in: &cancelable)
         
+        newSession.$activity.sink { [weak self] activity in
+            self?.send(event: .newActivity, body: activity.eventPayload)
+        }.store(in: &cancelable)
+        
         self.tasks.insert(Task {[weak self] in
             for await (message, _) in messenger.messages(of: GenericActivityMessage.self) {
                 self?.send(event: .receivedMessage, body: message.info)
             }
         })
         
-        self.send(event: .newSession, body: [
-            "title":newSession.activity.title,
-            "extraInfo":newSession.activity.extraInfo
-        ])
+        self.send(event: .newSession, body: newSession.activity.eventPayload)
 
         self.messenger = messenger
+        
+        self.send(event: .available, body: true)
     }
     
-    func start(title: String, extraInfo: String?) async throws {
-        let activity = GenericGroupActivity(title: title, extraInfo: extraInfo)
-        _ = try await activity.activate()
-    }
-    
-    func prepare(title: String, extraInfo: String?) async throws {
-        let activity = GenericGroupActivity(title: title, extraInfo: extraInfo)
-        let result = await activity.prepareForActivation()
-        if case .activationPreferred = result {
-            _ = try await activity.activate()
+    func start(
+        title: String,
+        extraInfo: String?,
+        fallbackURL: String?,
+        prepareFirst: Bool
+    ) async throws {
+        let activity = GenericGroupActivity(title: title, extraInfo: extraInfo, fallbackURL: fallbackURL)
+        if let groupSession = groupSession {
+            groupSession.activity = activity
+            return
         }
+        if prepareFirst {
+            if case .activationPreferred = await activity.prepareForActivation() {
+                _ = try await activity.activate()
+            }
+            return
+        }
+        _ = try await activity.activate()
     }
     
     func join() {
@@ -165,18 +186,23 @@ class SharePlay: RCTEventEmitter {
     @objc(isSharePlayAvailable:withRejecter:)
     func isSharePlayAvailable(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
         if #available(iOS 15, *) {
-            resolve(self.sharePlay?.groupSession != nil || GroupStateObserver().isEligibleForGroupSession)
+            resolve(GroupStateObserver().isEligibleForGroupSession)
         } else {
             resolve(false)
         }
     }
 
-    @objc(startActivity:withExtraInfo:withResolver:withRejecter:)
-    func startActivity(title: String, extraInfo: String?, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
+    @objc(startActivity:withOptions:withResolver:withRejecter:)
+    func startActivity(title: String, options: [String: Any], resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
         if #available(iOS 15, *) {
             Task {
                 do {
-                    try await self.sharePlay?.start(title: title, extraInfo: extraInfo)
+                    try await self.sharePlay?.start(
+                        title: title,
+                        extraInfo: options["extraInfo"] as? String,
+                        fallbackURL: options["fallbackURL"] as? String,
+                        prepareFirst: options["prepareFire"] as? Bool ?? false
+                    )
                     resolve(nil)
                 } catch {
                     reject("failed", "Failed to start group activity", error)
@@ -187,24 +213,6 @@ class SharePlay: RCTEventEmitter {
             reject("not_available", "Share Play is not available on this iOS version", nil)
         }
     }
-    
-    @objc(prepareAndStartActivity:withExtraInfo:withResolver:withRejecter:)
-    func prepareAndStartActivity(title: String, extraInfo: String?, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) -> Void {
-        if #available(iOS 15, *) {
-            Task {
-                do {
-                    try await self.sharePlay?.start(title: title, extraInfo: extraInfo)
-                    resolve(nil)
-                } catch {
-                    reject("failed", "Failed to start group activity", error)
-                }
-
-            }
-        } else {
-            reject("not_available", "Share Play is not available on this iOS version", nil)
-        }
-    }
-
     
     @objc(getInitialSession:withRejecter:)
     func getInitialSession(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
