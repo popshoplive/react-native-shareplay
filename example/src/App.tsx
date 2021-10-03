@@ -4,29 +4,30 @@ import { StyleSheet, View, Text, Alert, Button } from 'react-native';
 import SharePlay, { SharePlayEvent } from 'react-native-ios-shareplay';
 import { useCallback, useState } from 'react';
 
-const useIsSharePlayAvailable = () => {
+export default function App() {
+  const [logs, setLogs] = useState<string[]>([]);
   const [isAvailable, setIsAvailable] = useState(false);
   React.useEffect(() => {
     SharePlay.isSharePlayAvailable().then((ava) => {
+      setLogs((p) => [...p, `available start: ${ava}`]);
       setIsAvailable(ava);
     });
-    const em = SharePlayEvent.addListener('available', setIsAvailable);
+    const em = SharePlayEvent.addListener('available', (a) => {
+      setLogs((p) => [...p, `available changed: ${a}`]);
+      setIsAvailable(a);
+    });
     return () => {
       em.remove();
     };
   }, []);
-  return isAvailable;
-};
 
-export default function App() {
-  const isAvailable = useIsSharePlayAvailable();
-  const [logs, setLogs] = useState<string[]>([]);
   React.useEffect(() => {
     if (!isAvailable) {
       return;
     }
     SharePlay.getInitialSession().then((session) => {
       if (session != null) {
+        setLogs((p) => [...p, `init session: ${JSON.stringify(session)}`]);
         SharePlay.joinSession();
       }
     });
