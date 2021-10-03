@@ -10,6 +10,9 @@ yarn add react-native-ios-shareplay
 
 And go to Xcode Capabilities and enable "Group Activities"
 
+## Example
+<video src='https://user-images.githubusercontent.com/1057756/135738117-349cbd3e-5e80-48cf-a1cc-40ab4df027e0.mp4' width=280/>
+
 ## Usage
 
 ```js
