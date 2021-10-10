@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { StyleSheet, View, Text, Alert, Button } from 'react-native';
-import SharePlay, { SharePlayEvent } from 'react-native-ios-shareplay';
+import SharePlay, { SharePlayEvent } from 'react-native-shareplay';
 import { useCallback, useState } from 'react';
 
 export default function App() {

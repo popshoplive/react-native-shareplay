@@ -1,6 +1,6 @@
 {
-  "name": "react-native-share-play-example",
-  "description": "Example app for react-native-share-play",
+  "name": "react-native-shareplay-example",
+  "description": "Example app for react-native-shareplay",
   "version": "0.0.1",
   "private": true,
   "scripts": {

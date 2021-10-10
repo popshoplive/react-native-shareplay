@@ -8,7 +8,7 @@ target 'SharePlayExample' do
 
   use_react_native!(:path => config["reactNativePath"])
 
-  pod 'react-native-share-play', :path => '../..'
+  pod 'react-native-shareplay', :path => '../..'
 
   # Enables Flipper.
   #

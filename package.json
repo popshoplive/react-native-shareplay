@@ -1,5 +1,5 @@
 {
-  "name": "react-native-ios-shareplay",
+  "name": "react-native-shareplay",
   "version": "0.3.5",
   "description": "iOS 15 share play API in RN",
   "main": "lib/commonjs/index",
@@ -12,7 +12,7 @@
     "lib",
     "ios",
     "cpp",
-    "react-native-share-play.podspec",
+    "react-native-shareplay.podspec",
     "!lib/typescript/example",
     "!ios/build",
     "!**/__tests__",
@@ -33,13 +33,13 @@
     "react-native",
     "ios"
   ],
-  "repository": "https://github.com/zhigang1992/react-native-share-play",
+  "repository": "https://github.com/popshoplive/react-native-shareplay",
   "author": "Kyle Fang <zhigang1992@gmail.com> (https://github.com/zhigang1992)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zhigang1992/react-native-share-play/issues"
+    "url": "https://github.com/popshoplive/react-native-shareplay/issues"
   },
-  "homepage": "https://github.com/zhigang1992/react-native-share-play#readme",
+  "homepage": "https://github.com/popshoplive/react-native-shareplay#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

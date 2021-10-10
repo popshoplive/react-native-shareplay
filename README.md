@@ -1,22 +1,23 @@
-# react-native-ios-shareplay
+# react-native-shareplay
 
 iOS 15 share play API in react-native
 
 ## Installation
 
 ```sh
-yarn add react-native-ios-shareplay
+yarn add react-native-shareplay
 ```
 
 And go to Xcode Capabilities and enable "Group Activities"
 
 ## Example
+
 <video src='https://user-images.githubusercontent.com/1057756/135738117-349cbd3e-5e80-48cf-a1cc-40ab4df027e0.mp4' width=280></video>
 
 ## Usage
 
 ```js
-import SharePlay from 'react-native-ios-shareplay';
+import SharePlay from 'react-native-shareplay';
 
 // initialize
 
