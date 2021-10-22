@@ -39,10 +39,17 @@ export default function App() {
     const newMessage = SharePlayEvent.addListener('receivedMessage', (info) => {
       setLogs((p) => [...p, `new message: ${info}`]);
     });
+    const sessionInvalid = SharePlayEvent.addListener(
+      'sessionInvalidated',
+      (info) => {
+        setLogs((p) => [...p, `session invalidated: ${info}`]);
+      }
+    );
     return () => {
       newActivity.remove();
       newSessionEm.remove();
       newMessage.remove();
+      sessionInvalid.remove();
     };
   }, [isAvailable]);
   const onPost = useCallback(async () => {
