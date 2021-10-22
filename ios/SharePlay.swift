@@ -108,9 +108,7 @@ class ActualSharePlay {
         
         self.send(event: .newSession, body: newSession.activity.eventPayload)
 
-        self.messenger = messenger
-        
-        self.send(event: .available, body: true)
+        self.messenger = messenger        
     }
     
     func start(
