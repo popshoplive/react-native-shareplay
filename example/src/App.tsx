@@ -28,12 +28,10 @@ export default function App() {
     SharePlay.getInitialSession().then((session) => {
       if (session != null) {
         setLogs((p) => [...p, `init session: ${JSON.stringify(session)}`]);
-        SharePlay.joinSession();
       }
     });
     const newSessionEm = SharePlayEvent.addListener('newSession', (id) => {
       setLogs((p) => [...p, `new session: ${JSON.stringify(id)}`]);
-      SharePlay.joinSession();
     });
     const newActivity = SharePlayEvent.addListener('newActivity', (info) => {
       setLogs((p) => [...p, `new activity: ${JSON.stringify(info)}`]);
@@ -74,8 +72,26 @@ export default function App() {
           });
         }}
       />
+      <Button
+        title="Join Session"
+        onPress={() => {
+          SharePlay.joinSession();
+        }}
+      />
       <Button title="Clear" onPress={() => setLogs([])} />
       <Button title={'Post Message'} onPress={onPost} />
+      <Button
+        title={'Leave Session'}
+        onPress={() => {
+          SharePlay.leaveSession();
+        }}
+      />
+      <Button
+        title={'End Session'}
+        onPress={() => {
+          SharePlay.endSession();
+        }}
+      />
     </View>
   );
 }

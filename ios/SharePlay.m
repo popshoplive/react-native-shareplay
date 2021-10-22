@@ -17,6 +17,8 @@ RCT_EXTERN_METHOD(joinSession)
          
 RCT_EXTERN_METHOD(leaveSession)
 
+RCT_EXTERN_METHOD(endSession)
+
 RCT_EXTERN_METHOD(sendMessage:(NSString *)info
                   withResolver:(RCTPromiseResolveBlock)resolve
                    withRejecter:(RCTPromiseRejectBlock)reject)

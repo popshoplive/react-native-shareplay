@@ -13,6 +13,7 @@ type SharePlayType = {
   ): Promise<void>;
   joinSession(): void;
   leaveSession(): void;
+  endSession(): void;
   sendMessage(info: string): Promise<void>;
 };
 

@@ -40,11 +40,13 @@ struct GenericActivityMessage: Codable {
 @available(iOS 15, *)
 class ActualSharePlay {
 
+    let groupStateObserver = GroupStateObserver()
+    
     weak var emitter: RCTEventEmitter?
     init(emitter: RCTEventEmitter) {
         self.emitter = emitter
         
-        GroupStateObserver().$isEligibleForGroupSession.sink(receiveValue: {[weak self] available in
+        self.groupStateObserver.$isEligibleForGroupSession.sink(receiveValue: {[weak self] available in
             self?.send(event: .available, body: available)
         }).store(in: &cancelable)
         
@@ -142,13 +144,25 @@ class ActualSharePlay {
     }
     
     func leave() {
-        self.reset()
+        if let groupSession = groupSession {
+            groupSession.leave()
+        }
     }
     
+    func end() {
+        if let groupSession = groupSession {
+            groupSession.end()
+        }
+    }
+
 }
 
 @objc(SharePlay)
 class SharePlay: RCTEventEmitter {
+    
+    override class func requiresMainQueueSetup() -> Bool {
+        return true
+    }
     
     override func supportedEvents() -> [String]! {
         return SharePlayEvent.allCases.map({ $0.rawValue })
@@ -182,11 +196,11 @@ class SharePlay: RCTEventEmitter {
             super.sendEvent(withName: name, body: body)
         }
     }
-
+    
     @objc(isSharePlayAvailable:withRejecter:)
-    func isSharePlayAvailable(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
+    func isSharePlayAvailable(resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
         if #available(iOS 15, *) {
-            resolve(GroupStateObserver().isEligibleForGroupSession)
+            resolve(self.sharePlay!.groupStateObserver.isEligibleForGroupSession)
         } else {
             resolve(false)
         }
@@ -197,11 +211,11 @@ class SharePlay: RCTEventEmitter {
         if #available(iOS 15, *) {
             Task {
                 do {
-                    try await self.sharePlay?.start(
+                    try await self.sharePlay!.start(
                         title: title,
                         extraInfo: options["extraInfo"] as? String,
                         fallbackURL: options["fallbackURL"] as? String,
-                        prepareFirst: options["prepareFire"] as? Bool ?? false
+                        prepareFirst: options["prepareFirst"] as? Bool ?? false
                     )
                     resolve(nil)
                 } catch {
@@ -238,6 +252,13 @@ class SharePlay: RCTEventEmitter {
         }
     }
     
+    @objc(endSession)
+    func endSession() {
+        if #available(iOS 15, *) {
+            self.sharePlay?.end()
+        }
+    }
+
     @objc(sendMessage:withResolver:withRejecter:)
     func sendMessage(info: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if #available(iOS 15, *) {
