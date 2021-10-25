@@ -8,6 +8,7 @@ type SharePlayType = {
     options: {
       extraInfo?: string;
       fallbackURL?: string;
+      supportsContinuationOnTV?: boolean;
       prepareFirst?: boolean;
     }
   ): Promise<void>;

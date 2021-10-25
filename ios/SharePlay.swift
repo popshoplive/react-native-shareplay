@@ -13,6 +13,7 @@ struct GenericGroupActivity: GroupActivity {
     let title: String
     let extraInfo: String?
     let fallbackURL: String?
+    let supportsContinuationOnTV: Bool?
     
     static var activityIdentifier: String = "generic-group-activity"
     
@@ -22,6 +23,7 @@ struct GenericGroupActivity: GroupActivity {
         metadata.title = self.title
         metadata.type = .generic
         metadata.fallbackURL = self.fallbackURL.flatMap({URL(string: $0)})
+        metadata.supportsContinuationOnTV = self.supportsContinuationOnTV ?? false
         return metadata
     }
     
@@ -115,9 +117,15 @@ class ActualSharePlay {
         title: String,
         extraInfo: String?,
         fallbackURL: String?,
+        supportsContinuationOnTV: Bool?,
         prepareFirst: Bool
     ) async throws {
-        let activity = GenericGroupActivity(title: title, extraInfo: extraInfo, fallbackURL: fallbackURL)
+        let activity = GenericGroupActivity(
+            title: title,
+            extraInfo: extraInfo,
+            fallbackURL: fallbackURL,
+            supportsContinuationOnTV: supportsContinuationOnTV
+        )
         if let groupSession = groupSession {
             groupSession.activity = activity
             return
@@ -215,6 +223,7 @@ class SharePlay: RCTEventEmitter {
                         title: title,
                         extraInfo: options["extraInfo"] as? String,
                         fallbackURL: options["fallbackURL"] as? String,
+                        supportsContinuationOnTV: options["supportsContinuationOnTV"] as? Bool,
                         prepareFirst: options["prepareFirst"] as? Bool ?? false
                     )
                     resolve(nil)
