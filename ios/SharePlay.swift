@@ -40,15 +40,22 @@ struct GenericActivityMessage: Codable {
     let info: String
 }
 
+class Weak<T: AnyObject> {
+  weak var value : T?
+  init (value: T) {
+    self.value = value
+  }
+}
+
 @available(iOS 15, *)
 class ActualSharePlay {
-
+    
+    static let shared = ActualSharePlay()
+    
     let groupStateObserver = GroupStateObserver()
     
-    weak var emitter: RCTEventEmitter?
-    init(emitter: RCTEventEmitter) {
-        self.emitter = emitter
-        
+    var emitters: [Weak<RCTEventEmitter>] = []
+    init() {
         self.groupStateObserver.$isEligibleForGroupSession.sink(receiveValue: {[weak self] available in
             self?.send(event: .available, body: available)
         }).store(in: &cancelable)
@@ -61,7 +68,9 @@ class ActualSharePlay {
     }
     
     func send(event: SharePlayEvent, body: Any!) {
-        self.emitter?.sendEvent(withName: event.rawValue, body: body)
+        self.emitters.forEach({
+            $0.value?.sendEvent(withName: event.rawValue, body: body)
+        })
     }
     
     var cancelable = Set<AnyCancellable>()
@@ -175,19 +184,17 @@ class SharePlay: RCTEventEmitter {
     override func supportedEvents() -> [String]! {
         return SharePlayEvent.allCases.map({ $0.rawValue })
     }
-
-    var realthing: Any?
     
     @available(iOS 15, *)
-    var sharePlay: ActualSharePlay? {
-        return self.realthing as? ActualSharePlay
+    var sharePlay: ActualSharePlay {
+        return ActualSharePlay.shared
     }
     
     override init() {
         super.init()
 
         if #available(iOS 15, *) {
-            self.realthing = ActualSharePlay(emitter: self)
+            ActualSharePlay.shared.emitters.append(Weak(value: self))
         }
     }
 
@@ -208,7 +215,7 @@ class SharePlay: RCTEventEmitter {
     @objc(isSharePlayAvailable:withRejecter:)
     func isSharePlayAvailable(resolve: @escaping RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
         if #available(iOS 15, *) {
-            resolve(self.sharePlay!.groupStateObserver.isEligibleForGroupSession)
+            resolve(self.sharePlay.groupStateObserver.isEligibleForGroupSession)
         } else {
             resolve(false)
         }
@@ -219,7 +226,7 @@ class SharePlay: RCTEventEmitter {
         if #available(iOS 15, *) {
             Task {
                 do {
-                    try await self.sharePlay!.start(
+                    try await self.sharePlay.start(
                         title: title,
                         extraInfo: options["extraInfo"] as? String,
                         fallbackURL: options["fallbackURL"] as? String,
@@ -240,7 +247,7 @@ class SharePlay: RCTEventEmitter {
     @objc(getInitialSession:withRejecter:)
     func getInitialSession(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) -> Void {
         if #available(iOS 15, *) {
-            resolve(self.sharePlay?.getInitialSession())
+            resolve(self.sharePlay.getInitialSession())
         } else {
             resolve(nil)
         }
@@ -250,21 +257,21 @@ class SharePlay: RCTEventEmitter {
     @objc(joinSession)
     func joinSession() {
         if #available(iOS 15, *) {
-            self.sharePlay?.join()
+            self.sharePlay.join()
         }
     }
 
     @objc(leaveSession)
     func leaveSession() {
         if #available(iOS 15, *) {
-            self.sharePlay?.leave()
+            self.sharePlay.leave()
         }
     }
     
     @objc(endSession)
     func endSession() {
         if #available(iOS 15, *) {
-            self.sharePlay?.end()
+            self.sharePlay.end()
         }
     }
 
@@ -273,7 +280,7 @@ class SharePlay: RCTEventEmitter {
         if #available(iOS 15, *) {
             Task {
                 do {
-                    try await self.sharePlay?.sendMessage(info: info)
+                    try await self.sharePlay.sendMessage(info: info)
                     resolve(nil)
                 } catch {
                     reject("failed", "Failed to start group activity", error)
