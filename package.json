@@ -1,6 +1,6 @@
 {
   "name": "react-native-shareplay",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "iOS 15 share play API in RN",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
