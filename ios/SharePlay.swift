@@ -9,16 +9,16 @@ enum SharePlayEvent: String, CaseIterable {
     case sessionInvalidated
 }
 
-struct GenericGroupActivity: GroupActivity {
+public struct GenericGroupActivity: GroupActivity {
     let title: String
     let extraInfo: String?
     let fallbackURL: String?
     let supportsContinuationOnTV: Bool?
     
-    static var activityIdentifier: String = "generic-group-activity"
+    public static var activityIdentifier: String = "generic-group-activity"
     
     @available(iOS 15, *)
-    var metadata: GroupActivityMetadata {
+    public var metadata: GroupActivityMetadata {
         var metadata = GroupActivityMetadata()
         metadata.title = self.title
         metadata.type = .generic
@@ -48,9 +48,9 @@ class Weak<T: AnyObject> {
 }
 
 @available(iOS 15, *)
-class ActualSharePlay {
+public class ActualSharePlay {
     
-    static let shared = ActualSharePlay()
+    public static let shared = ActualSharePlay()
     
     let groupStateObserver = GroupStateObserver()
     
@@ -75,7 +75,7 @@ class ActualSharePlay {
     
     var cancelable = Set<AnyCancellable>()
     var tasks = Set<Task<Void, Error>>()
-    var groupSession: GroupSession<GenericGroupActivity>?
+    public var groupSession: GroupSession<GenericGroupActivity>?
     var messenger: GroupSessionMessenger?
     func reset() {
         self.groupSession?.leave()
