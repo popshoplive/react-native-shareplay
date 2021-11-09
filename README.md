@@ -8,7 +8,8 @@ iOS 15 share play API in react-native
 yarn add react-native-shareplay
 ```
 
-And go to Xcode Capabilities and enable "Group Activities"
+* Go to Xcode Capabilities and enable "Group Activities"
+* Make sure your iOS Deployment target is 11.0 (`IPHONEOS_DEPLOYMENT_TARGET` in `project.pbxproj` and `platform :ios, '11.0'` in your `Podfile`)
 
 ## Example
 
