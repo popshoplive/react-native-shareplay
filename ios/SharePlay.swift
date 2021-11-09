@@ -7,6 +7,8 @@ enum SharePlayEvent: String, CaseIterable {
     case newActivity
     case receivedMessage
     case sessionInvalidated
+    case sessionWaiting
+    case sessionJoined
 }
 
 public struct GenericGroupActivity: GroupActivity {
@@ -101,9 +103,15 @@ public class ActualSharePlay {
         let messenger = GroupSessionMessenger(session: newSession)
         
         newSession.$state.sink {[weak self] state in
-            if case .invalidated(let reason) = state {
-                self?.send(event: .sessionInvalidated, body: "\(reason)")
-                self?.reset()
+            switch state {
+            case .waiting:
+                self?.send(event: .sessionWaiting, body: newSession.activity.eventPayload)
+            case .joined:
+                self?.send(event: .sessionJoined, body: newSession.activity.eventPayload)
+            case .invalidated(reason: let reason):
+                 self?.send(event: .sessionInvalidated, body: "\(reason)")
+                 self?.reset()
+            @unknown default: break
             }
         }.store(in: &cancelable)
         
